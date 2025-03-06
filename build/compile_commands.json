@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/mikhail/programming/cs/dsa/labs/lab3/build",
+  "command": "/usr/bin/clang++ -I/home/mikhail/programming/cs/dsa/labs/lab3/includes -g -std=gnu++23 -fcolor-diagnostics -fopenmp -g -ggdb -Werror -Wall -Wpedantic -Wno-parentheses -o src/CMakeFiles/main.dir/main.cpp.o -c /home/mikhail/programming/cs/dsa/labs/lab3/src/main.cpp",
+  "file": "/home/mikhail/programming/cs/dsa/labs/lab3/src/main.cpp",
+  "output": "src/CMakeFiles/main.dir/main.cpp.o"
+}
+]
