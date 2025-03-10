@@ -6,6 +6,8 @@
 #include <initializer_list>
 #include <print>
 
+using std::println;
+
 template<class T, class Compare = std::less<T>>
     requires std::equality_comparable<T>
 class My_set
@@ -30,28 +32,33 @@ public:
         Node* current() { return _current; }
         iterator operator++()
         {
-            if (_current->right)
+            if (_current->is_nill) return _current;
+
+            if (!_current->right->is_nill)
             {
                 _current = _current->right;
-                while (_current->left) _current = _current->left;
+                while (!_current->left->is_nill) _current = _current->left;
                 return _current;
             }
             else
             {
+                if (_current->parent->is_nill) return _current->parent;
+
                 auto temp = _current->parent;
+                if (temp->left == _current)
+                {
+                    _current = temp;
+                    return temp;
+                }
+
                 while (temp->data < _current->data)
                 {
-                    if (temp->left && temp->left->data > _current->data)
+                    temp = temp->parent;
+                    if (temp->is_nill)
                     {
-                        _current = temp->left;
-                        return _current;
+                        _current = temp;
+                        return temp;
                     }
-                    else if (temp->right && temp->right->data > _current->data)
-                    {
-                        _current = temp->right;
-                        return _current;
-                    }
-                    else temp = temp->parent;
                 }
                 _current = temp;
                 return _current;
@@ -70,18 +77,18 @@ public:
 
     My_set& operator=(const My_set& rhs);
 
-    bool is_empty() const { return !_size; }
+    bool empty() const { return !_size; }
     std::size_t size() const { return _size; }
-    bool is_equal(const My_set& rhs) const;
+    bool equal(const My_set& rhs) const;
 
 
     iterator begin() { return _begin; }
     iterator end() { return _end; }
     iterator lower_bound(const value_type& value);
     iterator upper_bound(const value_type& value);
+    iterator find(value_type value) { return find(_root, value); }
     iterator find_min();
     iterator find_max();
-    iterator find(Node* cur, value_type value);
     iterator find_prev(iterator it);
     iterator find_next(iterator it);
 
@@ -94,8 +101,12 @@ public:
     void print_infix() const;
     void print_reverse_infix() const;
     void print_layers() const;
+
     // print method to visualise a tree
     void print_post() { print_post(_root); }
+    // method to check if all the nodes have links alright
+    void check_all_links() const;
+
 
 private:
     std::size_t _size{0};
@@ -103,11 +114,11 @@ private:
     Node* _begin;
     Node* _end{static_cast<Node*>(operator new(sizeof(Node)))};
 
-    void clear(Node* b);
     const_iterator insert(value_type value, Node* pos);
     void print_infix(Node* n) const;
     void print_post(Node* n, std::size_t depth = 0);
-
+    iterator find(Node* cur, value_type value);
+    iterator erase_leaf(iterator pos);
 
     struct Node
     {
@@ -130,7 +141,7 @@ My_set<T, Compare>::My_set()
     _end->parent = _root;
     _end->left = _end->right = _end;
     _root = _end;
-    _root->left = _root->right = _end;
+    _root->left = _root->right = _root->parent = _end;
     _begin = _root;
     _begin->left = _begin->right = _end;
 }
@@ -139,23 +150,21 @@ template<class T, class Compare>
     requires std::equality_comparable<T>
 My_set<T, Compare>::My_set(const My_set& rhs) : My_set()
 {
-    _size = rhs._size;
-    for (const auto& x : rhs) this->insert(x);
+    for (const auto& x : rhs) insert(x);
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
 My_set<T, Compare>::My_set(const std::initializer_list<T>& lst) : My_set()
 {
-    _size = lst.size();
-    for (const auto& x : lst) this->insert(x);
+    for (const auto& x : lst) insert(x);
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
 My_set<T, Compare>::~My_set()
 {
-    clear();
+    clear(); // TODO
     delete _end;
 }
 
@@ -174,7 +183,7 @@ template<class T, class Compare>
 My_set<T, Compare>::iterator My_set<T, Compare>::find(Node* cur,
                                                       value_type value)
 {
-    if (*cur == value) return cur;
+    if (cur->data == value) return cur;
     if (!cur || cur == end()) return end();
 
     if (value < cur->data) return find(cur->left, value);
@@ -228,7 +237,7 @@ template<class T, class Compare>
     requires std::equality_comparable<T>
 void My_set<T, Compare>::clear()
 {
-    clear(_root);
+    erase(begin(), end());
 }
 
 template<class T, class Compare>
@@ -238,55 +247,109 @@ My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value)
     if (_root->is_nill)
     {
         _root = new Node{value, _end, _end, _end};
+        _begin = _root;
+        _end->parent = _root;
+        ++_size;
+        check_all_links(); // TODO delete after debugging
         return _root;
     }
     return insert(value, _root);
 }
 
-// TODO implement end() checks and check if there is a parent
+
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator it)
+My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value,
+                                                        Node* pos)
 {
-    if (it->parent->is_nill)
+    if (pos->data == value) return pos;
+
+    if (pos->data > value)
     {
-        delete it.current();
-        it = _end;
-        return _end;
-    }
-    else if (it->left->is_nill && it->right->is_nill)
-    {
-        auto temp = it->parent;
-        if (temp->left == it) temp->left = _end;
-        else temp->right = _end;
-        delete it.current();
-        if (temp) return temp; // TODO debug from here
-        else return end();
-    }
-    if (it->left && (!it->right || it->right == _end))
-    {
-        if (it->parent->left == it.current()) it->parent->left = it->left;
-        else it->parent->right = it->left;
-    }
-    else if (it->right && !it->left)
-    {
-        if (it->parent->left == it.current()) it->parent->left = it->right;
-        else it->parent->right = it->right;
-    }
-    else if (it->left && it->right)
-    {
-        if (it->parent->left == it.current())
+        if (pos->left->is_nill)
         {
-            it->parent->left = it->left;
-            it->left->parent = it->parent;
-            it->left->right = it->right;
+            pos->left = new Node{value, pos, _end, _end};
+            ++_size;
+            if (value < _begin->data) _begin = pos->left;
+            check_all_links(); // TODO delete after debugging
+            return pos->left;
         }
-        if (it->parent->right == it.current())
+        return insert(value, pos->left);
+    }
+    else
+    {
+        if (pos->right->is_nill)
         {
-            it->parent->right = it->left;
-            it->left->parent = it->parent;
-            it->left->right = it->right;
+            pos->right = new Node{value, pos, _end, _end};
+            ++_size;
+            _end->parent = pos->right;
+            check_all_links(); // TODO delete after debugging
+            return pos->right;
         }
+        return insert(value, pos->right);
+    }
+}
+
+template<class T, class Compare>
+    requires std::equality_comparable<T>
+My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator pos)
+{
+    if (pos->is_nill) return _end;
+    --_size;
+
+    if (pos->left->is_nill && pos->right->is_nill)
+    {
+        auto temp = pos->parent;
+        if (temp->is_nill) _begin = _root = _end;
+        else
+        {
+            if (temp->left == pos) temp->left = _end;
+            else temp->right = _end;
+            if (pos == begin()) _begin = temp;
+        }
+        delete pos.current();
+        return temp;
+    }
+    else if (!pos->left->is_nill && !pos->right->is_nill)
+    {
+        auto temp = pos->left;
+        while (!temp->right->is_nill) temp = temp->right;
+        if (temp->parent != pos) temp->parent->right = temp->left;
+
+        if (!temp->left->is_nill) { temp->left->parent = temp->parent; }
+
+        if (pos->parent->is_nill) _root = temp;
+        else
+        {
+            if (pos->parent->left == pos) pos->parent->left = temp;
+            else pos->parent->right = temp;
+        }
+        temp->parent = pos->parent;
+        if (temp != pos->right)
+        {
+            temp->right = pos->right;
+            pos->right->parent = temp;
+        }
+        if (temp != pos->left)
+        {
+            temp->left = pos->left;
+            pos->left->parent = temp;
+        }
+        if (temp->left->right == temp) temp->left->right = _end;
+
+        delete pos.current();
+        return temp;
+    }
+    else
+    {
+        auto temp = pos->left->is_nill ? pos->right : pos->left;
+        if (pos->parent->left == pos) pos->parent->left = temp;
+        else pos->parent->right = temp;
+        temp->parent = pos->parent;
+        if (pos == begin()) _begin = temp;
+        if (pos->parent->is_nill) _root = temp;
+        delete pos.current();
+        return temp;
     }
 }
 
@@ -295,6 +358,9 @@ template<class T, class Compare>
 My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator first,
                                                        iterator last)
 {
+    while (first != last) first = erase(first);
+
+    return first;
 }
 
 template<class T, class Compare>
@@ -330,60 +396,8 @@ void My_set<T, Compare>::print_layers() const
 // greater in some way
 template<class T, class Compare>
     requires std::equality_comparable<T>
-bool My_set<T, Compare>::is_equal(const My_set& rhs) const
+bool My_set<T, Compare>::equal(const My_set& rhs) const
 {
-}
-
-template<class T, class Compare>
-    requires std::equality_comparable<T>
-void My_set<T, Compare>::clear(Node* b)
-{
-    _size = 0;
-    if (!b || b == _end) return;
-
-    if (!b->left && (!b->right || b->right == _end)) erase(b);
-    else
-    {
-        clear(b->left);
-        clear(b->right);
-    }
-}
-
-template<class T, class Compare>
-    requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value,
-                                                        Node* pos)
-{
-    if (pos->data == value) return pos;
-
-    if (pos->data > value)
-    {
-        if (pos->left->is_nill)
-        {
-            pos->left = new Node{value, pos, _end, _end};
-            ++_size;
-            if (value < _begin->data) _begin = pos->left;
-            return pos->left;
-        }
-        return insert(value, pos->left);
-    }
-    else
-    {
-        if (pos->right->is_nill)
-        {
-            pos->right = new Node{value, pos, _end, _end};
-            ++_size;
-            return pos->right;
-        }
-        else if (pos->right->is_nill)
-        {
-            pos->right = new Node{value, pos, _end, _end};
-            ++_size;
-            _end->parent = pos->right;
-            return pos->right;
-        }
-        return insert(value, pos->right);
-    }
 }
 
 template<class T, class Compare>
@@ -407,8 +421,28 @@ void My_set<T, Compare>::print_post(Node* n, size_t depth)
         std::println("{} {}", s, n->data);
         print_post(n->left, depth + 1);
     }
+}
 
-    return;
+template<class T, class Compare>
+    requires std::equality_comparable<T>
+void My_set<T, Compare>::check_all_links() const
+{
+
+    if (!_root->is_nill && !_root->parent->is_nill)
+        println("root parent isn't nill");
+    if (!_end->is_nill) println("end isn't nill");
+    if (empty())
+    {
+        if (!_root->is_nill) println("root isn't nill in empty set");
+        if (!_begin->is_nill) println("begin isn't nill in empty set");
+    }
+    else if (_size == 1)
+    {
+        if (_root->is_nill) println("root is nill in set with one elem");
+        if (_begin->is_nill || _begin != _root)
+            println("invalid begin in set with one elem");
+    }
+    else {}
 }
 
 template<class T, class Compare = std::less<T>>
@@ -417,6 +451,14 @@ void swap(My_set<T, Compare>& a, My_set<T, Compare>& b)
 {
     a.swap(b);
 }
+
+
+
+
+
+
+
+
 
 
 #endif
