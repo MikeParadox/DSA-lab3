@@ -1,5 +1,5 @@
-#ifndef MY_SET_H
-#define MY_SET_H
+#ifndef BST_H
+#define BST_H
 
 #include <algorithm>
 #include <chrono>
@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <initializer_list>
 #include <iterator>
-#include <limits>
 #include <print>
 #include <queue>
 #include <random>
@@ -18,7 +17,7 @@ using std::println;
 
 template<class T, class Compare = std::less<T>>
     requires std::equality_comparable<T>
-class My_set
+class BinarySearchTree
 {
     struct Node;
 
@@ -41,10 +40,10 @@ public:
     {
     public:
         using iterator_category = std::bidirectional_iterator_tag;
-        using value_type = My_set::value_type;
-        using difference_type = My_set::difference_type;
-        using pointer = My_set::const_pointer;
-        using reference = My_set::const_reference;
+        using value_type = BinarySearchTree::value_type;
+        using difference_type = BinarySearchTree::difference_type;
+        using pointer = BinarySearchTree::const_pointer;
+        using reference = BinarySearchTree::const_reference;
 
 
         iterator(Node* n) : _current{n} {}
@@ -95,25 +94,25 @@ public:
         Node* _current;
     };
 
-    My_set();
-    My_set(const My_set& rhs);
-    My_set(const std::initializer_list<T>& lst);
-    ~My_set();
+    BinarySearchTree();
+    BinarySearchTree(const BinarySearchTree& rhs);
+    BinarySearchTree(const std::initializer_list<T>& lst);
+    ~BinarySearchTree();
 
-    My_set& operator=(const My_set& rhs);
+    BinarySearchTree& operator=(const BinarySearchTree& rhs);
 
     bool empty() const { return !_size; }
     std::size_t size() const { return _size; }
-    bool equal(const My_set& rhs) const;
+    bool equal(const BinarySearchTree& rhs) const;
 
 
-    iterator begin() { return _begin; }
-    const_iterator begin() const { return _begin; }
+    iterator begin() { return _end->left; }
+    const_iterator begin() const { return _end->left; }
     iterator end() { return _end; }
     const_iterator end() const { return _end; }
     iterator lower_bound(const value_type& value);
     iterator upper_bound(const value_type& value);
-    iterator find(value_type value) { return find(_root, value); }
+    iterator find(value_type value) { return find(_end->right, value); }
     iterator find_min() { return begin(); }
     iterator find_max() { return --end(); }
     iterator find_prev(iterator it) { return --it; }
@@ -123,19 +122,17 @@ public:
     iterator erase(iterator pos);
     iterator erase(iterator first, iterator last);
     void clear();
-    void swap(My_set& rhs) noexcept;
+    void swap(BinarySearchTree& rhs) noexcept;
 
     void print_infix() const;
     void print_reverse_infix() const;
     void print_layers() const;
 
     // print method to visualise a tree
-    void print_post() { print_post(_root); }
+    void print_post() { print_post(_end->right); }
 
 private:
     std::size_t _size{0};
-    Node* _root;
-    Node* _begin;
     Node* _end{static_cast<Node*>(operator new(sizeof(Node)))};
 
     const_iterator insert(value_type value, Node* pos);
@@ -159,38 +156,41 @@ private:
 };
 
 template<class T, class Compare>
-using iterator = typename My_set<T, Compare>::iterator;
+using iterator = typename BinarySearchTree<T, Compare>::iterator;
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::My_set()
+BinarySearchTree<T, Compare>::BinarySearchTree()
 {
     _end->is_nill = true;
-    _end->parent = _root;
+    _end->parent = _end->right;
     _end->left = _end->right = _end;
-    _root = _end;
-    _root->left = _root->right = _root->parent = _end;
-    _begin = _root;
-    _begin->left = _begin->right = _end;
+    _end->right = _end;
+    _end->right->left = _end->right->right = _end->right->parent = _end;
+    _end->left = _end->right;
+    _end->left->left = _end->left->right = _end;
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::My_set(const My_set& rhs) : My_set()
+BinarySearchTree<T, Compare>::BinarySearchTree(const BinarySearchTree& rhs)
+    : BinarySearchTree()
 {
     for (const auto& x : rhs) { insert(x); }
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::My_set(const std::initializer_list<T>& lst) : My_set()
+BinarySearchTree<T, Compare>::BinarySearchTree(
+    const std::initializer_list<T>& lst)
+    : BinarySearchTree()
 {
     for (const auto& x : lst) insert(x);
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::~My_set()
+BinarySearchTree<T, Compare>::~BinarySearchTree()
 {
     clear();
     delete _end;
@@ -198,7 +198,8 @@ My_set<T, Compare>::~My_set()
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>& My_set<T, Compare>::operator=(const My_set& rhs)
+BinarySearchTree<T, Compare>&
+BinarySearchTree<T, Compare>::operator=(const BinarySearchTree& rhs)
 {
     auto temp{rhs};
     swap(temp);
@@ -208,8 +209,8 @@ My_set<T, Compare>& My_set<T, Compare>::operator=(const My_set& rhs)
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::find(Node* cur,
-                                                      value_type value)
+BinarySearchTree<T, Compare>::iterator
+BinarySearchTree<T, Compare>::find(Node* cur, value_type value)
 {
     if (cur->data == value) return cur;
     if (!cur || cur == end()) return end();
@@ -220,11 +221,12 @@ My_set<T, Compare>::iterator My_set<T, Compare>::find(Node* cur,
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-iterator<T, Compare> My_set<T, Compare>::lower_bound(const value_type& value)
+iterator<T, Compare>
+BinarySearchTree<T, Compare>::lower_bound(const value_type& value)
 {
     if (empty()) return _end;
 
-    auto temp = _root;
+    auto temp = _end->right;
 
     while (!temp->is_nill)
     {
@@ -243,11 +245,12 @@ iterator<T, Compare> My_set<T, Compare>::lower_bound(const value_type& value)
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-iterator<T, Compare> My_set<T, Compare>::upper_bound(const value_type& value)
+iterator<T, Compare>
+BinarySearchTree<T, Compare>::upper_bound(const value_type& value)
 {
     if (empty()) return _end;
 
-    auto temp = _root;
+    auto temp = _end->right;
 
     while (!temp->is_nill)
     {
@@ -266,30 +269,31 @@ iterator<T, Compare> My_set<T, Compare>::upper_bound(const value_type& value)
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-void My_set<T, Compare>::clear()
+void BinarySearchTree<T, Compare>::clear()
 {
     erase(begin(), end());
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value)
+BinarySearchTree<T, Compare>::iterator
+BinarySearchTree<T, Compare>::insert(value_type value)
 {
-    if (_root->is_nill)
+    if (_end->right->is_nill)
     {
-        _root = new Node{value, _end, _end, _end};
-        _begin = _root;
-        _end->parent = _root;
+        _end->right = new Node{value, _end, _end, _end};
+        _end->left = _end->right;
+        _end->parent = _end->right;
         ++_size;
-        return _root;
+        return _end->right;
     }
-    return insert(value, _root);
+    return insert(value, _end->right);
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value,
-                                                        Node* pos)
+BinarySearchTree<T, Compare>::iterator
+BinarySearchTree<T, Compare>::insert(value_type value, Node* pos)
 {
     if (pos->data == value) return pos;
 
@@ -299,7 +303,7 @@ My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value,
         {
             pos->left = new Node{value, pos, _end, _end};
             ++_size;
-            if (value < _begin->data) _begin = pos->left;
+            if (value < _end->left->data) _end->left = pos->left;
             return pos->left;
         }
         return insert(value, pos->left);
@@ -319,7 +323,8 @@ My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value,
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator pos)
+BinarySearchTree<T, Compare>::iterator
+BinarySearchTree<T, Compare>::erase(iterator pos)
 {
     if (pos->is_nill) return pos;
     --_size;
@@ -329,9 +334,9 @@ My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator pos)
         if (!pos->parent->is_nill)
             pos->parent->left == pos ? pos->parent->left = _end
                                      : pos->parent->right = _end;
-        else _root = _end;
+        else _end->right = _end;
 
-        if (pos == begin()) _begin = pos->parent;
+        if (pos == begin()) _end->left = pos->parent;
         auto temp = pos->parent;
         delete pos.current();
 
@@ -344,9 +349,9 @@ My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator pos)
         if (!pos->parent->is_nill)
             pos->parent->left == pos ? pos->parent->left = child
                                      : pos->parent->right = child;
-        else _root = child;
+        else _end->right = child;
 
-        if (pos == begin()) _begin = child;
+        if (pos == begin()) _end->left = child;
         auto temp = pos;
         ++temp;
         delete pos.current();
@@ -359,7 +364,7 @@ My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator pos)
         ++res;
         auto temp = pos->left;
         while (!temp->right->is_nill) temp = temp->right;
-        if (pos->parent->is_nill) _root = temp;
+        if (pos->parent->is_nill) _end->right = temp;
         else
             pos->parent->left == pos ? pos->parent->left = temp
                                      : pos->parent->right = temp;
@@ -393,8 +398,8 @@ My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator pos)
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator first,
-                                                       iterator last)
+BinarySearchTree<T, Compare>::iterator
+BinarySearchTree<T, Compare>::erase(iterator first, iterator last)
 {
     while (first != last) first = erase(first);
 
@@ -403,28 +408,28 @@ My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator first,
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-void My_set<T, Compare>::swap(My_set& rhs) noexcept
+void BinarySearchTree<T, Compare>::swap(BinarySearchTree& rhs) noexcept
 {
     std::swap(_size, rhs._size);
-    std::swap(_root, rhs._root);
-    std::swap(_begin, rhs._begin);
+    std::swap(_end->right, rhs._end->right);
+    std::swap(_end->left, rhs._end->left);
     std::swap(_end, rhs._end);
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-void My_set<T, Compare>::print_infix() const
+void BinarySearchTree<T, Compare>::print_infix() const
 {
-    print_infix(_root);
+    print_infix(_end->right);
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-void My_set<T, Compare>::print_reverse_infix() const
+void BinarySearchTree<T, Compare>::print_reverse_infix() const
 {
     std::stack<Node*> st;
 
-    Node* curr{_root};
+    Node* curr{_end->right};
 
     while (curr != _end || st.empty() == false)
     {
@@ -445,12 +450,12 @@ void My_set<T, Compare>::print_reverse_infix() const
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-void My_set<T, Compare>::print_layers() const
+void BinarySearchTree<T, Compare>::print_layers() const
 {
-    if (_root == _end) return;
+    if (_end->right == _end) return;
 
     std::queue<Node*> q;
-    q.push(_root);
+    q.push(_end->right);
 
     while (!q.empty())
     {
@@ -471,14 +476,14 @@ void My_set<T, Compare>::print_layers() const
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-bool My_set<T, Compare>::equal(const My_set& rhs) const
+bool BinarySearchTree<T, Compare>::equal(const BinarySearchTree& rhs) const
 {
-    return compare(_root, rhs._root);
+    return compare(_end->right, rhs._end->right);
 }
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-bool My_set<T, Compare>::compare(Node* a, Node* b) const
+bool BinarySearchTree<T, Compare>::compare(Node* a, Node* b) const
 {
     if (a->is_nill != b->is_nill) return false;
     if (!a->is_nill)
@@ -490,7 +495,7 @@ bool My_set<T, Compare>::compare(Node* a, Node* b) const
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-void My_set<T, Compare>::print_infix(Node* n) const
+void BinarySearchTree<T, Compare>::print_infix(Node* n) const
 {
     if (!n || n == _end) return;
     print_infix(n->left);
@@ -500,7 +505,7 @@ void My_set<T, Compare>::print_infix(Node* n) const
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-void My_set<T, Compare>::print_post(Node* n, size_t depth)
+void BinarySearchTree<T, Compare>::print_post(Node* n, size_t depth)
 {
     if (!n->is_nill)
     {
@@ -513,7 +518,7 @@ void My_set<T, Compare>::print_post(Node* n, size_t depth)
 
 template<class T, class Compare = std::less<T>>
     requires std::equality_comparable<T>
-void swap(My_set<T, Compare>& a, My_set<T, Compare>& b)
+void swap(BinarySearchTree<T, Compare>& a, BinarySearchTree<T, Compare>& b)
 {
     a.swap(b);
 }
@@ -553,15 +558,13 @@ inline void sieve_array(int n)
             .count());
 }
 
-#include <set>
-
 inline void sieve_set(int n)
 {
 
     // std::chrono::steady_clock::time_point begin =
     //     std::chrono::steady_clock::now();
 
-    My_set<int> set;
+    BinarySearchTree<int> set;
     // std::set<int> set;
 
     std::vector<int> v(n - 2);
