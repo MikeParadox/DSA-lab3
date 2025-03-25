@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 {
     BinarySearchTree<int> set{25, 20, 50, 10, 22, 24, 23, 30, 40, 5,
                               12, 28, 38, 48, 1,  8,  15, 45, 36};
-    BinarySearchTree<int> set2{25, 20, 36, 10, 22, 24, 23, 30, 40, 5};
+    // BinarySearchTree<int> set2{25, 20, 36, 10, 22, 24, 23, 30, 40, 5};
     //                  12, 28, 38, 48, 1,  8,  15, 45, 50};
 
     // BinarySearchTree<int> set{1, 2, 3};
@@ -32,9 +32,12 @@ int main(int argc, char** argv)
     // BinarySearchTree<int> set2{set};
     // set2.print_post();
 
-    auto it = std::find(set.begin(), set.end(), 10);
-    println("{}", *it);
+    // set.swap(set2);
+    // auto it = std::find(set.begin(), set.end(), 10);
+    // println("{}", *it);
 
+    println("{}", std::count_if(set.begin(), set.end(),
+                                [](auto a) { return a % 2 == 0; }));
 
     return 0;
 }

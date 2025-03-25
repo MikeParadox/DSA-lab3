@@ -133,8 +133,12 @@ public:
     void print_post() { print_post(_end->right); }
 
 private:
+    using AllocType =
+        typename std::allocator_traits<Allocator>::template rebind_alloc<Node>;
+    AllocType _alloc;
+    Compare _cmp{Compare()};
     std::size_t _size{0};
-    Node* _end{static_cast<Node*>(operator new(sizeof(Node)))};
+    Node* _end{make_end()};
 
     const_iterator insert(value_type value, Node* pos);
     void print_infix(Node* n) const;
@@ -150,6 +154,59 @@ private:
         Node* right;
         bool is_nill{false};
     };
+
+
+    Node* make_end()
+    {
+        _end = _alloc.allocate(1);
+
+        std::allocator_traits<AllocType>::construct(_alloc, &(_end->parent));
+        _end->parent = _end;
+
+        std::allocator_traits<AllocType>::construct(_alloc, &(_end->left));
+        _end->left = _end;
+
+        std::allocator_traits<AllocType>::construct(_alloc, &(_end->right));
+        _end->right = _end;
+
+        _end->is_nill = true;
+
+        return _end;
+    }
+
+    Node* make_node(T&& elem, Node* parent, Node* left, Node* right)
+    {
+        Node* new_node{_alloc.allocate(1)};
+
+        std::allocator_traits<AllocType>::construct(_alloc,
+                                                    &(new_node->parent));
+        new_node->parent = parent;
+
+        std::allocator_traits<AllocType>::construct(_alloc, &(new_node->left));
+        new_node->left = left;
+
+        std::allocator_traits<AllocType>::construct(_alloc, &(new_node->right));
+        new_node->right = right;
+
+        std::allocator_traits<AllocType>::construct(_alloc, &(new_node->data),
+                                                    std::forward<T>(elem));
+
+        return new_node;
+    }
+
+    void delete_end(Node* node)
+    {
+        std::allocator_traits<AllocType>::destroy(_alloc, &(node->parent));
+        std::allocator_traits<AllocType>::destroy(_alloc, &(node->left));
+        std::allocator_traits<AllocType>::destroy(_alloc, &(node->right));
+        std::allocator_traits<AllocType>::deallocate(_alloc, node, 1);
+    }
+
+    inline void delete_node(Node* node)
+    {
+        std::allocator_traits<AllocType>::destroy(_alloc, &(node->data));
+        delete_end(node);
+    }
 };
 
 template<typename T, class Compare, class Allocator>
@@ -159,10 +216,6 @@ template<typename T, class Compare, class Allocator>
     requires std::equality_comparable<T>
 BinarySearchTree<T, Compare, Allocator>::BinarySearchTree()
 {
-    _end->is_nill = true;
-    _end->parent = _end->right;
-    _end->left = _end->right = _end;
-    _end->right = _end;
     _end->right->left = _end->right->right = _end->right->parent = _end;
     _end->left = _end->right;
     _end->left->left = _end->left->right = _end;
@@ -191,7 +244,7 @@ template<typename T, class Compare, class Allocator>
 BinarySearchTree<T, Compare, Allocator>::~BinarySearchTree()
 {
     clear();
-    delete _end;
+    delete_end(_end);
 }
 
 template<typename T, class Compare, class Allocator>
@@ -279,7 +332,7 @@ BinarySearchTree<T, Compare, Allocator>::insert(value_type value)
 {
     if (_end->right->is_nill)
     {
-        _end->right = new Node{value, _end, _end, _end};
+        _end->right = make_node(std::move(value), _end, _end, _end);
         _end->left = _end->right;
         _end->parent = _end->right;
         ++_size;
@@ -299,7 +352,7 @@ BinarySearchTree<T, Compare, Allocator>::insert(value_type value, Node* pos)
     {
         if (pos->left->is_nill)
         {
-            pos->left = new Node{value, pos, _end, _end};
+            pos->left = make_node(std::move(value), pos, _end, _end);
             ++_size;
             if (value < _end->left->data) _end->left = pos->left;
             return pos->left;
@@ -310,7 +363,7 @@ BinarySearchTree<T, Compare, Allocator>::insert(value_type value, Node* pos)
     {
         if (pos->right->is_nill)
         {
-            pos->right = new Node{value, pos, _end, _end};
+            pos->right = make_node(std::move(value), pos, _end, _end);
             ++_size;
             _end->parent = pos->right;
             return pos->right;
@@ -336,7 +389,7 @@ BinarySearchTree<T, Compare, Allocator>::erase(iterator pos)
 
         if (pos == begin()) _end->left = pos->parent;
         auto temp = pos->parent;
-        delete pos.current();
+        delete_node(pos.current());
 
         return temp;
     }
@@ -352,7 +405,7 @@ BinarySearchTree<T, Compare, Allocator>::erase(iterator pos)
         if (pos == begin()) _end->left = child;
         auto temp = pos;
         ++temp;
-        delete pos.current();
+        delete_node(pos.current());
 
         return temp;
     }
@@ -388,7 +441,7 @@ BinarySearchTree<T, Compare, Allocator>::erase(iterator pos)
         }
         temp->right->parent = temp;
 
-        delete pos.current();
+        delete_node(pos.current());
 
         return res;
     }

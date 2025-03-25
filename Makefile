@@ -9,7 +9,7 @@ multitest:
 filtered_tests:
 	./build/dsa_tests --gtest_filter=swap*
 valgrind:
-	valgrind --leak-check=yes -s ./build/main
+	valgrind --leak-check=yes --track-origins=yes -s ./build/main
 build_again:
 	rm -r build/*
 	cmake -G "Ninja" -B build -S .
