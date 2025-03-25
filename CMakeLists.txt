@@ -31,7 +31,7 @@ include_directories(includes)
 
 add_subdirectory(src)
 
-target_compile_options(main PUBLIC -fopenmp -g -ggdb
+target_compile_options(main PUBLIC -g -ggdb
 -Werror -Wall -Wpedantic -Wno-parentheses)
  # -ftime-report) # to get detailed compilation timer
  # -finput-charset=UTF-8 # enable UTF-8 support for GCC

@@ -1,10 +1,18 @@
 #ifndef MY_SET_H
 #define MY_SET_H
 
+#include <algorithm>
+#include <chrono>
 #include <concepts>
 #include <cstddef>
 #include <initializer_list>
+#include <iterator>
+#include <limits>
 #include <print>
+#include <queue>
+#include <random>
+#include <stack>
+#include <vector>
 
 using std::println;
 
@@ -17,14 +25,28 @@ class My_set
 public:
     class iterator;
 
+    using key_type = T;
+    using key_compare = Compare;
     using value_type = T;
-    using const_iterator = iterator;
-    using reference = value_type&;
+    using value_compare = Compare;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
     using pointer = value_type*;
+    using const_pointer = const value_type*;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using const_iterator = iterator;
 
     class iterator
     {
     public:
+        using iterator_category = std::bidirectional_iterator_tag;
+        using value_type = My_set::value_type;
+        using difference_type = My_set::difference_type;
+        using pointer = My_set::const_pointer;
+        using reference = My_set::const_reference;
+
+
         iterator(Node* n) : _current{n} {}
 
         value_type& operator*() { return _current->data; }
@@ -42,27 +64,30 @@ public:
             }
             else
             {
-                if (_current->parent->is_nill) return _current->parent;
+                if (_current->parent->is_nill) _current = _current->parent;
 
-                auto temp = _current->parent;
-                if (temp->left == _current)
+                else
                 {
-                    _current = temp;
-                    return temp;
-                }
-
-                while (temp->data < _current->data)
-                {
-                    temp = temp->parent;
-                    if (temp->is_nill)
+                    auto temp = _current->parent;
+                    if (temp->left == _current)
                     {
                         _current = temp;
                         return temp;
                     }
+
+                    while (temp->data < _current->data)
+                    {
+                        temp = temp->parent;
+                        if (temp->is_nill)
+                        {
+                            _current = temp;
+                            return temp;
+                        }
+                    }
+                    _current = temp;
                 }
-                _current = temp;
-                return _current;
             }
+            return _current;
         }
         auto operator<=>(const iterator& rhs) const = default;
 
@@ -83,14 +108,16 @@ public:
 
 
     iterator begin() { return _begin; }
+    const_iterator begin() const { return _begin; }
     iterator end() { return _end; }
+    const_iterator end() const { return _end; }
     iterator lower_bound(const value_type& value);
     iterator upper_bound(const value_type& value);
     iterator find(value_type value) { return find(_root, value); }
-    iterator find_min();
-    iterator find_max();
-    iterator find_prev(iterator it);
-    iterator find_next(iterator it);
+    iterator find_min() { return begin(); }
+    iterator find_max() { return --end(); }
+    iterator find_prev(iterator it) { return --it; }
+    iterator find_next(iterator it) { return ++it; }
 
     iterator insert(value_type value);
     iterator erase(iterator pos);
@@ -104,9 +131,6 @@ public:
 
     // print method to visualise a tree
     void print_post() { print_post(_root); }
-    // method to check if all the nodes have links alright
-    void check_all_links() const;
-
 
 private:
     std::size_t _size{0};
@@ -118,7 +142,11 @@ private:
     void print_infix(Node* n) const;
     void print_post(Node* n, std::size_t depth = 0);
     iterator find(Node* cur, value_type value);
-    iterator erase_leaf(iterator pos);
+    bool compare(Node* a, Node* b) const;
+    bool is_leaf(Node* n) const
+    {
+        return !n->is_nill && n->left->is_nill && n->right->is_nill;
+    }
 
     struct Node
     {
@@ -150,7 +178,7 @@ template<class T, class Compare>
     requires std::equality_comparable<T>
 My_set<T, Compare>::My_set(const My_set& rhs) : My_set()
 {
-    for (const auto& x : rhs) insert(x);
+    for (const auto& x : rhs) { insert(x); }
 }
 
 template<class T, class Compare>
@@ -164,7 +192,7 @@ template<class T, class Compare>
     requires std::equality_comparable<T>
 My_set<T, Compare>::~My_set()
 {
-    clear(); // TODO
+    clear();
     delete _end;
 }
 
@@ -192,45 +220,48 @@ My_set<T, Compare>::iterator My_set<T, Compare>::find(Node* cur,
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::find_min()
-{
-    return begin();
-}
-
-template<class T, class Compare>
-    requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::find_max()
-{
-    return _end->parent;
-}
-
-// TODO implement
-template<class T, class Compare>
-    requires std::equality_comparable<T>
 iterator<T, Compare> My_set<T, Compare>::lower_bound(const value_type& value)
 {
-    return _begin;
-}
+    if (empty()) return _end;
 
+    auto temp = _root;
+
+    while (!temp->is_nill)
+    {
+        if (temp->data == value) break;
+        if (temp->data < value) temp = temp->right;
+        else
+        {
+            if (!temp->left->is_nill && temp->left->data <= value)
+                temp = temp->left;
+            break;
+        }
+    }
+
+    return temp;
+}
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
 iterator<T, Compare> My_set<T, Compare>::upper_bound(const value_type& value)
 {
-}
+    if (empty()) return _end;
 
-template<class T, class Compare>
-    requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::find_prev(iterator it)
-{
-    return --it;
-}
+    auto temp = _root;
 
-template<class T, class Compare>
-    requires std::equality_comparable<T>
-My_set<T, Compare>::iterator My_set<T, Compare>::find_next(iterator it)
-{
-    return ++it;
+    while (!temp->is_nill)
+    {
+        if (temp->data == value) break;
+        if (temp->data > value) temp = temp->left;
+        else
+        {
+            if (!temp->right->is_nill && temp->right->data >= value)
+                temp = temp->right;
+            break;
+        }
+    }
+
+    return temp;
 }
 
 template<class T, class Compare>
@@ -250,12 +281,10 @@ My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value)
         _begin = _root;
         _end->parent = _root;
         ++_size;
-        check_all_links(); // TODO delete after debugging
         return _root;
     }
     return insert(value, _root);
 }
-
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
@@ -271,7 +300,6 @@ My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value,
             pos->left = new Node{value, pos, _end, _end};
             ++_size;
             if (value < _begin->data) _begin = pos->left;
-            check_all_links(); // TODO delete after debugging
             return pos->left;
         }
         return insert(value, pos->left);
@@ -283,7 +311,6 @@ My_set<T, Compare>::iterator My_set<T, Compare>::insert(value_type value,
             pos->right = new Node{value, pos, _end, _end};
             ++_size;
             _end->parent = pos->right;
-            check_all_links(); // TODO delete after debugging
             return pos->right;
         }
         return insert(value, pos->right);
@@ -294,62 +321,73 @@ template<class T, class Compare>
     requires std::equality_comparable<T>
 My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator pos)
 {
-    if (pos->is_nill) return _end;
+    if (pos->is_nill) return pos;
     --_size;
 
     if (pos->left->is_nill && pos->right->is_nill)
     {
+        if (!pos->parent->is_nill)
+            pos->parent->left == pos ? pos->parent->left = _end
+                                     : pos->parent->right = _end;
+        else _root = _end;
+
+        if (pos == begin()) _begin = pos->parent;
         auto temp = pos->parent;
-        if (temp->is_nill) _begin = _root = _end;
-        else
-        {
-            if (temp->left == pos) temp->left = _end;
-            else temp->right = _end;
-            if (pos == begin()) _begin = temp;
-        }
         delete pos.current();
+
         return temp;
     }
-    else if (!pos->left->is_nill && !pos->right->is_nill)
+    else if (pos->left->is_nill || pos->right->is_nill)
     {
-        auto temp = pos->left;
-        while (!temp->right->is_nill) temp = temp->right;
-        if (temp->parent != pos) temp->parent->right = temp->left;
+        auto child = pos->left->is_nill ? pos->right : pos->left;
+        child->parent = pos->parent;
+        if (!pos->parent->is_nill)
+            pos->parent->left == pos ? pos->parent->left = child
+                                     : pos->parent->right = child;
+        else _root = child;
 
-        if (!temp->left->is_nill) { temp->left->parent = temp->parent; }
-
-        if (pos->parent->is_nill) _root = temp;
-        else
-        {
-            if (pos->parent->left == pos) pos->parent->left = temp;
-            else pos->parent->right = temp;
-        }
-        temp->parent = pos->parent;
-        if (temp != pos->right)
-        {
-            temp->right = pos->right;
-            pos->right->parent = temp;
-        }
-        if (temp != pos->left)
-        {
-            temp->left = pos->left;
-            pos->left->parent = temp;
-        }
-        if (temp->left->right == temp) temp->left->right = _end;
-
+        if (pos == begin()) _begin = child;
+        auto temp = pos;
+        ++temp;
         delete pos.current();
+
         return temp;
     }
     else
     {
-        auto temp = pos->left->is_nill ? pos->right : pos->left;
-        if (pos->parent->left == pos) pos->parent->left = temp;
-        else pos->parent->right = temp;
-        temp->parent = pos->parent;
-        if (pos == begin()) _begin = temp;
+        auto res = pos;
+        ++res;
+        auto temp = pos->left;
+        while (!temp->right->is_nill) temp = temp->right;
         if (pos->parent->is_nill) _root = temp;
+        else
+            pos->parent->left == pos ? pos->parent->left = temp
+                                     : pos->parent->right = temp;
+
+        if (pos->left == temp)
+        {
+            temp->parent = pos->parent;
+            temp->right = pos->right;
+        }
+        else
+        {
+            if (!temp->left->is_nill)
+            {
+                temp->left->parent = temp->parent;
+                temp->parent->right = temp->left;
+            }
+            else temp->parent->right = _end;
+
+            temp->right = pos->right;
+            temp->left = pos->left;
+            temp->left->parent = temp;
+            temp->parent = pos->parent;
+        }
+        temp->right->parent = temp;
+
         delete pos.current();
-        return temp;
+
+        return res;
     }
 }
 
@@ -360,7 +398,7 @@ My_set<T, Compare>::iterator My_set<T, Compare>::erase(iterator first,
 {
     while (first != last) first = erase(first);
 
-    return first;
+    return last;
 }
 
 template<class T, class Compare>
@@ -384,20 +422,70 @@ template<class T, class Compare>
     requires std::equality_comparable<T>
 void My_set<T, Compare>::print_reverse_infix() const
 {
-} // using stack without recursion
+    std::stack<Node*> st;
+
+    Node* curr{_root};
+
+    while (curr != _end || st.empty() == false)
+    {
+        while (!curr->is_nill)
+        {
+            st.push(curr);
+            curr = curr->right;
+        }
+
+        curr = st.top();
+        st.pop();
+
+        std::print("{} ", curr->data);
+
+        curr = curr->left;
+    }
+}
 
 template<class T, class Compare>
     requires std::equality_comparable<T>
 void My_set<T, Compare>::print_layers() const
 {
+    if (_root == _end) return;
+
+    std::queue<Node*> q;
+    q.push(_root);
+
+    while (!q.empty())
+    {
+        auto level_size = q.size();
+
+        for (int i = 0; i < level_size; ++i)
+        {
+            Node* curr{q.front()};
+            q.pop();
+
+            std::print("{} ", curr->data);
+            if (curr->left != _end) { q.push(curr->left); }
+            if (curr->right != _end) { q.push(curr->right); }
+            if (level_size - 1 == i) std::println();
+        }
+    }
 }
 
-// TODO ask if it should just return bool or find out which one is
-// greater in some way
 template<class T, class Compare>
     requires std::equality_comparable<T>
 bool My_set<T, Compare>::equal(const My_set& rhs) const
 {
+    return compare(_root, rhs._root);
+}
+
+template<class T, class Compare>
+    requires std::equality_comparable<T>
+bool My_set<T, Compare>::compare(Node* a, Node* b) const
+{
+    if (a->is_nill != b->is_nill) return false;
+    if (!a->is_nill)
+        return (a->data == b->data) && compare(a->left, b->left) &&
+               compare(a->right, b->right);
+
+    return true;
 }
 
 template<class T, class Compare>
@@ -423,28 +511,6 @@ void My_set<T, Compare>::print_post(Node* n, size_t depth)
     }
 }
 
-template<class T, class Compare>
-    requires std::equality_comparable<T>
-void My_set<T, Compare>::check_all_links() const
-{
-
-    if (!_root->is_nill && !_root->parent->is_nill)
-        println("root parent isn't nill");
-    if (!_end->is_nill) println("end isn't nill");
-    if (empty())
-    {
-        if (!_root->is_nill) println("root isn't nill in empty set");
-        if (!_begin->is_nill) println("begin isn't nill in empty set");
-    }
-    else if (_size == 1)
-    {
-        if (_root->is_nill) println("root is nill in set with one elem");
-        if (_begin->is_nill || _begin != _root)
-            println("invalid begin in set with one elem");
-    }
-    else {}
-}
-
 template<class T, class Compare = std::less<T>>
     requires std::equality_comparable<T>
 void swap(My_set<T, Compare>& a, My_set<T, Compare>& b)
@@ -452,11 +518,86 @@ void swap(My_set<T, Compare>& a, My_set<T, Compare>& b)
     a.swap(b);
 }
 
+inline void sieve_array(int n)
+{
+    std::vector<int> v(n);
 
+    std::chrono::steady_clock::time_point begin =
+        std::chrono::steady_clock::now();
 
+    for (int i{2}; i <= std::sqrt(n); ++i)
+    {
+        if (!v[i])
+        {
+            for (int j{2}; i * j < n; j++) v[j * i] = 1;
+        }
+    }
 
+    for (int i{2}, count{0}; i < n && count != n; ++i)
+    {
+        if (!v[i])
+        {
+            ++count;
+            // std::print("{} ", i);
+        }
+    }
 
+    std::chrono::steady_clock::time_point end =
+        std::chrono::steady_clock::now();
 
+    std::println();
+
+    std::println(
+        "Time of sieve on array with {} elems {}", n,
+        std::chrono::duration_cast<std::chrono::microseconds>(end - begin)
+            .count());
+}
+
+#include <set>
+
+inline void sieve_set(int n)
+{
+
+    // std::chrono::steady_clock::time_point begin =
+    //     std::chrono::steady_clock::now();
+
+    My_set<int> set;
+    // std::set<int> set;
+
+    std::vector<int> v(n - 2);
+
+    for (int i{2}; i < n; ++i) v[i - 2] = i;
+
+    auto rng = std::default_random_engine{};
+    std::ranges::shuffle(v, rng);
+    for (const auto& x : v) set.insert(x);
+
+    std::chrono::steady_clock::time_point begin =
+        std::chrono::steady_clock::now();
+
+    for (auto it{set.begin()}; it != set.end(); ++it)
+    {
+        auto prime = *it;
+        auto del = it;
+        ++del;
+
+        while (del != set.end()) // node
+        {
+            if ((*del) % prime == 0) del = set.erase(del);
+            else ++del;
+        }
+    }
+
+    std::chrono::steady_clock::time_point end =
+        std::chrono::steady_clock::now();
+
+    std::println(
+        "Time of sieve on set with {} elems {}", n,
+        std::chrono::duration_cast<std::chrono::microseconds>(end - begin)
+            .count());
+
+    // set.print_infix();
+}
 
 
 

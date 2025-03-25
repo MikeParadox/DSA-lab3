@@ -1,0 +1,7 @@
+/home/mikhail/programming/cs/dsa/labs/lab3/release/CMakeFiles/test.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/release/CMakeFiles/edit_cache.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/release/CMakeFiles/rebuild_cache.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/release/src/CMakeFiles/main.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/release/src/CMakeFiles/test.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/release/src/CMakeFiles/edit_cache.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/release/src/CMakeFiles/rebuild_cache.dir

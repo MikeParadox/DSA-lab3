@@ -91,7 +91,7 @@ build cmake_object_order_depends_target_main: phony || src/CMakeFiles/main.dir
 
 build src/CMakeFiles/main.dir/main.cpp.o: CXX_COMPILER__main_unscanned_Debug /home/mikhail/programming/cs/dsa/labs/lab3/src/main.cpp || cmake_object_order_depends_target_main
   DEP_FILE = src/CMakeFiles/main.dir/main.cpp.o.d
-  FLAGS = -g -std=gnu++23 -fcolor-diagnostics -fopenmp -g -ggdb -Werror -Wall -Wpedantic -Wno-parentheses
+  FLAGS = -g -std=gnu++23 -fcolor-diagnostics -g -ggdb -Werror -Wall -Wpedantic -Wno-parentheses
   INCLUDES = -I/home/mikhail/programming/cs/dsa/labs/lab3/includes
   OBJECT_DIR = src/CMakeFiles/main.dir
   OBJECT_FILE_DIR = src/CMakeFiles/main.dir

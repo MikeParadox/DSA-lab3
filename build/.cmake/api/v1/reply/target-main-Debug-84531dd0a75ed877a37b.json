@@ -68,10 +68,6 @@
 				},
 				{
 					"backtrace" : 4,
-					"fragment" : "-fopenmp"
-				},
-				{
-					"backtrace" : 4,
 					"fragment" : "-g"
 				},
 				{
