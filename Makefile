@@ -3,11 +3,11 @@ compile:
 run:
 	./build/main
 test:
-	./build/dsa_tests
+	./build/main_tests
 multitest:
-	./build/dsa_tests --gtest_repeat=100
+	./build/main_tests --gtest_repeat=100
 filtered_tests:
-	./build/dsa_tests --gtest_filter=swap*
+	./build/main_tests --gtest_filter=swap*
 valgrind:
 	valgrind --leak-check=yes --track-origins=yes -s ./build/main
 build_again:

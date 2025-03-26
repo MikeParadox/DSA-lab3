@@ -36,6 +36,8 @@ public:
     using reference = value_type&;
     using const_reference = const value_type&;
     using const_iterator = iterator;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     class iterator
     {
@@ -104,13 +106,25 @@ public:
 
     bool empty() const { return !_size; }
     std::size_t size() const { return _size; }
-    bool equal(const BinarySearchTree& rhs) const;
+    bool operator==(const BinarySearchTree& rhs) const
+    {
+        return compare(_end->right, rhs._end->right);
+    }
 
 
     iterator begin() { return _end->left; }
     const_iterator begin() const { return _end->left; }
     iterator end() { return _end; }
     const_iterator end() const { return _end; }
+    reverse_iterator rbegin() const noexcept
+    {
+        return std::make_reverse_iterator(begin());
+    }
+    reverse_iterator rend() const noexcept
+    {
+        return std::make_reverse_iterator(end());
+    }
+
     iterator lower_bound(const value_type& value);
     iterator upper_bound(const value_type& value);
     iterator find(value_type value) { return find(_end->right, value); }
@@ -124,6 +138,7 @@ public:
     iterator erase(iterator first, iterator last);
     void clear();
     void swap(BinarySearchTree& rhs) noexcept;
+
 
     void print_infix() const;
     void print_reverse_infix() const;
@@ -154,7 +169,6 @@ private:
         Node* right;
         bool is_nill{false};
     };
-
 
     Node* make_end()
     {
@@ -526,14 +540,6 @@ void BinarySearchTree<T, Compare, Allocator>::print_layers() const
 
 template<typename T, class Compare, class Allocator>
     requires std::equality_comparable<T>
-bool BinarySearchTree<T, Compare, Allocator>::equal(
-    const BinarySearchTree& rhs) const
-{
-    return compare(_end->right, rhs._end->right);
-}
-
-template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
 bool BinarySearchTree<T, Compare, Allocator>::compare(Node* a, Node* b) const
 {
     if (a->is_nill != b->is_nill) return false;
@@ -575,86 +581,6 @@ void swap(BinarySearchTree<T, Compare, Allocator>& a,
 {
     a.swap(b);
 }
-
-inline void sieve_array(int n)
-{
-    std::vector<int> v(n);
-
-    std::chrono::steady_clock::time_point begin =
-        std::chrono::steady_clock::now();
-
-    for (int i{2}; i <= std::sqrt(n); ++i)
-    {
-        if (!v[i])
-        {
-            for (int j{2}; i * j < n; j++) v[j * i] = 1;
-        }
-    }
-
-    for (int i{2}, count{0}; i < n && count != n; ++i)
-    {
-        if (!v[i])
-        {
-            ++count;
-            // std::print("{} ", i);
-        }
-    }
-
-    std::chrono::steady_clock::time_point end =
-        std::chrono::steady_clock::now();
-
-    std::println();
-
-    std::println(
-        "Time of sieve on array with {} elems {}", n,
-        std::chrono::duration_cast<std::chrono::microseconds>(end - begin)
-            .count());
-}
-
-inline void sieve_set(int n)
-{
-
-    // std::chrono::steady_clock::time_point begin =
-    //     std::chrono::steady_clock::now();
-
-    BinarySearchTree<int> set;
-    // std::set<int> set;
-
-    std::vector<int> v(n - 2);
-
-    for (int i{2}; i < n; ++i) v[i - 2] = i;
-
-    auto rng = std::default_random_engine{};
-    std::ranges::shuffle(v, rng);
-    for (const auto& x : v) set.insert(x);
-
-    std::chrono::steady_clock::time_point begin =
-        std::chrono::steady_clock::now();
-
-    for (auto it{set.begin()}; it != set.end(); ++it)
-    {
-        auto prime = *it;
-        auto del = it;
-        ++del;
-
-        while (del != set.end()) // node
-        {
-            if ((*del) % prime == 0) del = set.erase(del);
-            else ++del;
-        }
-    }
-
-    std::chrono::steady_clock::time_point end =
-        std::chrono::steady_clock::now();
-
-    std::println(
-        "Time of sieve on set with {} elems {}", n,
-        std::chrono::duration_cast<std::chrono::microseconds>(end - begin)
-            .count());
-
-    // set.print_infix();
-}
-
 
 
 

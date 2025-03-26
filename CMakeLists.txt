@@ -30,6 +30,7 @@ enable_testing()
 include_directories(includes)
 
 add_subdirectory(src)
+add_subdirectory(tests)
 
 target_compile_options(main PUBLIC -g -ggdb
 -Werror -Wall -Wpedantic -Wno-parentheses)
