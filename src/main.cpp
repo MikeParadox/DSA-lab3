@@ -4,11 +4,16 @@
 
 using std::println;
 
+template<typename T> using Myal = std::allocator<T>;
+template<typename T> using Mypred = std::less<T>;
+template<typename T>
+using ContainerTemplate = BinarySearchTree<T, Mypred<T>, Myal<T>>;
 
 int main(int argc, char** argv)
 {
-    BinarySearchTree<int> set{25, 20, 50, 10, 22, 24, 23, 30, 40, 5,
-                              12, 28, 38, 48, 1,  8,  15, 45, 36};
+
+    // BinarySearchTree<int> set{25, 20, 50, 10, 22, 24, 23, 30, 40, 5,
+    //                           12, 28, 38, 48, 1,  8,  15, 45, 36};
     // BinarySearchTree<int> set2{25, 20, 36, 10, 22, 24, 23, 30, 40, 5};
     //                  12, 28, 38, 48, 1,  8,  15, 45, 50};
 
@@ -36,8 +41,22 @@ int main(int argc, char** argv)
     // auto it = std::find(set.begin(), set.end(), 10);
     // println("{}", *it);
 
-    println("{}", std::count_if(set.begin(), set.end(),
-                                [](auto a) { return a % 2 == 0; }));
+    // println("{}", std::count_if(set.begin(), set.end(),
+    //                             [](auto a) { return a % 2 == 0; }));
+
+    // {
+    //     ContainerTemplate<int> T1;
+    //     ContainerTemplate<int> Tree = {40, 50, 30, 35, 10, 75, 23, 87, 68};
+    //     ContainerTemplate<int> Tree2(Tree);
+    // }
+
+    ContainerTemplate<int> Tree = {40, 50, 30, 35, 10, 75, 23, 87, 68};
+    ContainerTemplate<int> Tree2;
+    Tree2 = Tree;
+    // println("{}", Tree == Tree2);
+    Tree.print_post();
+    Tree2.print_post();
+    println("{}", Tree == Tree2);
 
     return 0;
 }

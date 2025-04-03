@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Site BuildName="(empty)"
-	BuildStamp="20250326-1955-Experimental"
+	BuildStamp="20250331-1825-Experimental"
 	Name="(empty)"
 	Generator="ctest-3.28.3"
 	CompilerName=""
 	CompilerVersion=""
 	OSName="Linux"
 	Hostname="mikhail-Raider-GE78HX-13VH"
-	OSRelease="6.11.0-19-generic"
-	OSVersion="#19~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Mon Feb 17 11:51:52 UTC 2"
+	OSRelease="6.11.0-21-generic"
+	OSVersion="#21~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Mon Feb 24 16:52:15 UTC 2"
 	OSPlatform="x86_64"
 	Is64Bits="1"
 	VendorString="GenuineIntel"
@@ -21,14 +21,14 @@
 	TotalVirtualMemory="0"
 	TotalPhysicalMemory="63995"
 	LogicalProcessorsPerPhysical="1"
-	ProcessorClockFrequency="2738.04"
+	ProcessorClockFrequency="1728.85"
 	>
 	<Testing>
-		<StartDateTime>Mar 26 22:55 MSK</StartDateTime>
-		<StartTestTime>1743018917</StartTestTime>
+		<StartDateTime>Mar 31 21:45 MSK</StartDateTime>
+		<StartTestTime>1743446736</StartTestTime>
 		<TestList/>
-		<EndDateTime>Mar 26 22:55 MSK</EndDateTime>
-		<EndTestTime>1743018917</EndTestTime>
+		<EndDateTime>Mar 31 21:45 MSK</EndDateTime>
+		<EndTestTime>1743446736</EndTestTime>
 		<ElapsedMinutes>0</ElapsedMinutes>
 	</Testing>
 </Site>

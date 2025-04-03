@@ -38,6 +38,8 @@ public:
     using const_iterator = iterator;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+    using AllocType =
+        typename std::allocator_traits<Allocator>::template rebind_alloc<Node>;
 
     class iterator
     {
@@ -91,6 +93,42 @@ public:
             }
             return _current;
         }
+        iterator operator--()
+        {
+            if (_current->is_nill) return _current;
+
+            if (!_current->left->is_nill)
+            {
+                _current = _current->left;
+                while (!_current->right->is_nill) _current = _current->right;
+                return _current;
+            }
+            else
+            {
+                if (_current->parent->is_nill) _current = _current->parent;
+                else
+                {
+                    auto temp = _current->parent;
+                    if (temp->right == _current)
+                    {
+                        _current = temp;
+                        return temp;
+                    }
+
+                    while (temp->data > _current->data)
+                    {
+                        temp = temp->parent;
+                        if (temp->is_nill)
+                        {
+                            _current = temp;
+                            return temp;
+                        }
+                    }
+                    _current = temp;
+                }
+            }
+            return _current;
+        }
         auto operator<=>(const iterator& rhs) const = default;
 
     private:
@@ -100,6 +138,7 @@ public:
     BinarySearchTree();
     BinarySearchTree(const BinarySearchTree& rhs);
     BinarySearchTree(const std::initializer_list<T>& lst);
+    template<class Iterator> BinarySearchTree(Iterator begin, Iterator end);
     ~BinarySearchTree();
 
     BinarySearchTree& operator=(const BinarySearchTree& rhs);
@@ -133,12 +172,15 @@ public:
     iterator find_prev(iterator it) { return --it; }
     iterator find_next(iterator it) { return ++it; }
 
-    iterator insert(value_type value);
+    iterator insert(const value_type& value);
+    template<class U> std::pair<iterator, bool> insert(U&& value);
     iterator erase(iterator pos);
     iterator erase(iterator first, iterator last);
+    size_type erase(const value_type& value);
     void clear();
     void swap(BinarySearchTree& rhs) noexcept;
 
+    AllocType get_allocator() const { return _alloc; }
 
     void print_infix() const;
     void print_reverse_infix() const;
@@ -148,8 +190,6 @@ public:
     void print_post() { print_post(_end->right); }
 
 private:
-    using AllocType =
-        typename std::allocator_traits<Allocator>::template rebind_alloc<Node>;
     AllocType _alloc;
     Compare _cmp{Compare()};
     std::size_t _size{0};
@@ -204,6 +244,7 @@ private:
 
         std::allocator_traits<AllocType>::construct(_alloc, &(new_node->data),
                                                     std::forward<T>(elem));
+        new_node->is_nill = false;
 
         return new_node;
     }
@@ -221,6 +262,8 @@ private:
         std::allocator_traits<AllocType>::destroy(_alloc, &(node->data));
         delete_end(node);
     }
+
+    void dispatch(Node* n);
 };
 
 template<typename T, class Compare, class Allocator>
@@ -241,7 +284,7 @@ BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(
     const BinarySearchTree& rhs)
     : BinarySearchTree()
 {
-    for (const auto& x : rhs) { insert(x); }
+    dispatch(rhs.end()->right);
 }
 
 template<typename T, class Compare, class Allocator>
@@ -251,6 +294,19 @@ BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(
     : BinarySearchTree()
 {
     for (const auto& x : lst) insert(x);
+}
+
+template<typename T, class Compare, class Allocator>
+    requires std::equality_comparable<T>
+template<class Iterator>
+BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(Iterator begin,
+                                                          Iterator end)
+{
+    std::vector<T> temp{begin, end};
+    auto rng = std::default_random_engine{};
+    std::shuffle(std::begin(temp), std::end(temp), rng);
+
+    for (const auto& x : temp) insert(x);
 }
 
 template<typename T, class Compare, class Allocator>
@@ -342,7 +398,7 @@ void BinarySearchTree<T, Compare, Allocator>::clear()
 template<typename T, class Compare, class Allocator>
     requires std::equality_comparable<T>
 BinarySearchTree<T, Compare, Allocator>::iterator
-BinarySearchTree<T, Compare, Allocator>::insert(value_type value)
+BinarySearchTree<T, Compare, Allocator>::insert(const value_type& value)
 {
     if (_end->right->is_nill)
     {
@@ -353,6 +409,24 @@ BinarySearchTree<T, Compare, Allocator>::insert(value_type value)
         return _end->right;
     }
     return insert(value, _end->right);
+}
+
+template<typename T, class Compare, class Allocator>
+    requires std::equality_comparable<T>
+template<class U>
+std::pair<typename BinarySearchTree<T, Compare, Allocator>::iterator, bool>
+BinarySearchTree<T, Compare, Allocator>::insert(U&& value)
+{
+    value_type val{std::forward<U>(value)};
+    auto res = find(val);
+    bool is_inserted{false};
+    if (res == _end)
+    {
+        res = insert(val);
+        is_inserted = true;
+    }
+
+    return std::pair<iterator, bool>{res, is_inserted};
 }
 
 template<typename T, class Compare, class Allocator>
@@ -473,6 +547,14 @@ BinarySearchTree<T, Compare, Allocator>::erase(iterator first, iterator last)
 
 template<typename T, class Compare, class Allocator>
     requires std::equality_comparable<T>
+BinarySearchTree<T, Compare, Allocator>::size_type
+BinarySearchTree<T, Compare, Allocator>::erase(const value_type& value)
+{
+    return erase(find(value)) != _end;
+}
+
+template<typename T, class Compare, class Allocator>
+    requires std::equality_comparable<T>
 void BinarySearchTree<T, Compare, Allocator>::swap(
     BinarySearchTree& rhs) noexcept
 {
@@ -581,6 +663,33 @@ void swap(BinarySearchTree<T, Compare, Allocator>& a,
 {
     a.swap(b);
 }
+
+template<class T, class Compare, class Allocator>
+    requires std::equality_comparable<T>
+void BinarySearchTree<T, Compare, Allocator>::dispatch(Node* n)
+{
+    if (n->is_nill) return;
+
+    std::queue<Node*> q;
+    q.push(n);
+
+    while (!q.empty())
+    {
+        auto level_size = q.size();
+
+        for (int i = 0; i < level_size; ++i)
+        {
+            Node* curr{q.front()};
+            insert(curr->data);
+            q.pop();
+
+            if (!curr->left->is_nill) { q.push(curr->left); }
+            if (!curr->right->is_nill) { q.push(curr->right); }
+        }
+    }
+}
+
+
 
 
 

@@ -13,8 +13,8 @@ valgrind:
 build_again:
 	rm -r build/*
 	cmake -G "Ninja" -B build -S .
-to_build_release:
-	cmake -S . -B release/ -D CMAKE_BUILD_TYPE=Release
-	cmake --build release/	
-to_run_release:
-	./release/main
+# to_build_release:
+# 	cmake -S . -B release/ -D CMAKE_BUILD_TYPE=Release
+# 	cmake --build release/	
+# to_run_release:
+# 	./release/main
