@@ -33,3 +33,13 @@
 839	885	1744067666865630908	main	1c2acb74449bf6d4
 5	832	1744067680224569819	src/CMakeFiles/main.dir/main.cpp.o	da0079a2322028f2
 832	879	1744067680275569589	main	1c2acb74449bf6d4
+5	736	1744067847116918188	src/CMakeFiles/main.dir/main.cpp.o	da0079a2322028f2
+736	777	1744067847159918044	main	1c2acb74449bf6d4
+6	1200	1744067847577916643	tests/CMakeFiles/main_tests.dir/bstree_test.cpp.o	df520d2e44b7e44b
+1200	1264	1744067847646916412	main_tests	e50dfb35c1ebae45
+1200	1264	1744067847646916412	tests/main_tests[1]_tests.cmake	e50dfb35c1ebae45
+1200	1264	1744067847646916412	/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests/main_tests[1]_tests.cmake	e50dfb35c1ebae45
+6	1188	1744067875915823988	tests/CMakeFiles/main_tests.dir/bstree_test.cpp.o	df520d2e44b7e44b
+1188	1250	1744067875984823767	main_tests	e50dfb35c1ebae45
+1188	1250	1744067875984823767	tests/main_tests[1]_tests.cmake	e50dfb35c1ebae45
+1188	1250	1744067875984823767	/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests/main_tests[1]_tests.cmake	e50dfb35c1ebae45

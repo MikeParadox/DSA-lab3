@@ -193,9 +193,9 @@ public:
     void clear();
     void swap(BinarySearchTree& rhs) noexcept;
 
-    Compare get_compare() const { return _cmp; }
     AllocType get_allocator() const { return _alloc; }
-
+    key_compare key_comp() const noexcept { return _cmp; }
+    value_compare value_comp() const noexcept { return _cmp; }
 
     void print_infix() const;
     void print_reverse_infix() const;

@@ -231,14 +231,14 @@ TEST(SetTests, SetSwapAndCompTests)
     // ASSERT_TRUE(v0 <= v1 && v1 >= v0) << "Сравнение множеств некорректно!";
 }
 
-// TEST(SetTests, SetComparatorTests)
-// {
-//     Mycont v0;
-//     ASSERT_TRUE(v0.key_comp()('a', 'c') && !v0.key_comp()('a', 'a'))
-//         << "Некорректный компаратор!";
-//     ASSERT_TRUE(v0.value_comp()('a', 'c') && !v0.value_comp()('a', 'a'))
-//         << "Некорректный компаратор!";
-// }
+TEST(SetTests, SetComparatorTests)
+{
+    Mycont v0;
+    ASSERT_TRUE(v0.key_comp()('a', 'c') && !v0.key_comp()('a', 'a'))
+        << "Некорректный компаратор!";
+    ASSERT_TRUE(v0.value_comp()('a', 'c') && !v0.value_comp()('a', 'a'))
+        << "Некорректный компаратор!";
+}
 
 TEST(SetTests, SetAlgTests)
 {
