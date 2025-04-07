@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <print>
 
+using std::print;
 using std::println;
 
 template<typename T> using Myal = std::allocator<T>;
@@ -51,12 +52,17 @@ int main(int argc, char** argv)
     // }
 
     ContainerTemplate<int> Tree = {40, 50, 30, 35, 10, 75, 23, 87, 68};
-    ContainerTemplate<int> Tree2;
-    Tree2 = Tree;
-    // println("{}", Tree == Tree2);
+    ContainerTemplate<int> Tree2(Tree);
+    ContainerTemplate<int> Tree3{Tree.rbegin(), Tree.rend()};
+    // Tree2 = Tree;
+    println("{}", Tree == Tree2);
     Tree.print_post();
     Tree2.print_post();
-    println("{}", Tree == Tree2);
+    auto it = Tree.end();
+    println();
+    println("{}", *++it);
+    println("{}", *++it);
+
 
     return 0;
 }

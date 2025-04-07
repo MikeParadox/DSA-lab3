@@ -39,13 +39,13 @@ include CMakeFiles/rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = /home/mikhail/programming/cs/dsa/labs/lab3/build/
+cmake_ninja_workdir = /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/
 
 #############################################
 # Utility command for test
 
 build CMakeFiles/test.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build && /usr/bin/ctest --force-new-ctest-process
+  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug && /usr/bin/ctest --force-new-ctest-process
   DESC = Running tests...
   pool = console
   restat = 1
@@ -57,7 +57,7 @@ build test: phony CMakeFiles/test.util
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -68,7 +68,7 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build && /usr/bin/cmake --regenerate-during-build -S/home/mikhail/programming/cs/dsa/labs/lab3 -B/home/mikhail/programming/cs/dsa/labs/lab3/build
+  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug && /usr/bin/cmake --regenerate-during-build -S/home/mikhail/programming/cs/dsa/labs/lab3 -B/home/mikhail/programming/cs/dsa/labs/lab3/build/debug
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -120,7 +120,7 @@ build main: CXX_EXECUTABLE_LINKER__main_Debug src/CMakeFiles/main.dir/main.cpp.o
 # Utility command for test
 
 build src/CMakeFiles/test.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/src && /usr/bin/ctest --force-new-ctest-process
+  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/src && /usr/bin/ctest --force-new-ctest-process
   DESC = Running tests...
   pool = console
   restat = 1
@@ -132,7 +132,7 @@ build src/test: phony src/CMakeFiles/test.util
 # Utility command for edit_cache
 
 build src/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/src && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/src && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -143,7 +143,7 @@ build src/edit_cache: phony src/CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build src/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/src && /usr/bin/cmake --regenerate-during-build -S/home/mikhail/programming/cs/dsa/labs/lab3 -B/home/mikhail/programming/cs/dsa/labs/lab3/build
+  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/src && /usr/bin/cmake --regenerate-during-build -S/home/mikhail/programming/cs/dsa/labs/lab3 -B/home/mikhail/programming/cs/dsa/labs/lab3/build/debug
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -185,7 +185,7 @@ build main_tests tests/main_tests[1]_tests.cmake | ${cmake_ninja_workdir}tests/m
   FLAGS = -g
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgtest_main.a  /usr/lib/x86_64-linux-gnu/libgtest.a
   OBJECT_DIR = tests/CMakeFiles/main_tests.dir
-  POST_BUILD = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/tests && /usr/bin/cmake -D TEST_TARGET=main_tests -D TEST_EXECUTABLE=/home/mikhail/programming/cs/dsa/labs/lab3/build/main_tests -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/mikhail/programming/cs/dsa/labs/lab3/build/tests -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=main_tests_TESTS -D CTEST_FILE=/home/mikhail/programming/cs/dsa/labs/lab3/build/tests/main_tests[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.28/Modules/GoogleTestAddTests.cmake
+  POST_BUILD = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests && /usr/bin/cmake -D TEST_TARGET=main_tests -D TEST_EXECUTABLE=/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/main_tests -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=main_tests_TESTS -D CTEST_FILE=/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests/main_tests[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.28/Modules/GoogleTestAddTests.cmake
   PRE_LINK = :
   RESTAT = 1
   TARGET_COMPILE_PDB = tests/CMakeFiles/main_tests.dir/
@@ -197,7 +197,7 @@ build main_tests tests/main_tests[1]_tests.cmake | ${cmake_ninja_workdir}tests/m
 # Utility command for test
 
 build tests/CMakeFiles/test.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/tests && /usr/bin/ctest --force-new-ctest-process
+  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests && /usr/bin/ctest --force-new-ctest-process
   DESC = Running tests...
   pool = console
   restat = 1
@@ -209,7 +209,7 @@ build tests/test: phony tests/CMakeFiles/test.util
 # Utility command for edit_cache
 
 build tests/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/tests && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -220,7 +220,7 @@ build tests/edit_cache: phony tests/CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build tests/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/tests && /usr/bin/cmake --regenerate-during-build -S/home/mikhail/programming/cs/dsa/labs/lab3 -B/home/mikhail/programming/cs/dsa/labs/lab3/build
+  COMMAND = cd /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests && /usr/bin/cmake --regenerate-during-build -S/home/mikhail/programming/cs/dsa/labs/lab3 -B/home/mikhail/programming/cs/dsa/labs/lab3/build/debug
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -236,21 +236,21 @@ build tests/rebuild_cache: phony tests/CMakeFiles/rebuild_cache.util
 # =============================================================================
 
 #############################################
-# Folder: /home/mikhail/programming/cs/dsa/labs/lab3/build
+# Folder: /home/mikhail/programming/cs/dsa/labs/lab3/build/debug
 
 build all: phony src/all tests/all
 
 # =============================================================================
 
 #############################################
-# Folder: /home/mikhail/programming/cs/dsa/labs/lab3/build/src
+# Folder: /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/src
 
 build src/all: phony main
 
 # =============================================================================
 
 #############################################
-# Folder: /home/mikhail/programming/cs/dsa/labs/lab3/build/tests
+# Folder: /home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests
 
 build tests/all: phony main_tests
 

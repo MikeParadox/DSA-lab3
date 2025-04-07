@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/mikhail/programming/cs/dsa/labs/lab3/build/debug",
+  "command": "/usr/bin/clang++ -I/home/mikhail/programming/cs/dsa/labs/lab3/includes -g -std=gnu++23 -fcolor-diagnostics -g -ggdb -Werror -Wall -Wpedantic -Wno-parentheses -o src/CMakeFiles/main.dir/main.cpp.o -c /home/mikhail/programming/cs/dsa/labs/lab3/src/main.cpp",
+  "file": "/home/mikhail/programming/cs/dsa/labs/lab3/src/main.cpp",
+  "output": "src/CMakeFiles/main.dir/main.cpp.o"
+},
+{
+  "directory": "/home/mikhail/programming/cs/dsa/labs/lab3/build/debug",
+  "command": "/usr/bin/clang++ -I/home/mikhail/programming/cs/dsa/labs/lab3/includes -g -std=gnu++23 -fcolor-diagnostics -DGTEST_HAS_PTHREAD=1 -o tests/CMakeFiles/main_tests.dir/bstree_test.cpp.o -c /home/mikhail/programming/cs/dsa/labs/lab3/tests/bstree_test.cpp",
+  "file": "/home/mikhail/programming/cs/dsa/labs/lab3/tests/bstree_test.cpp",
+  "output": "tests/CMakeFiles/main_tests.dir/bstree_test.cpp.o"
+}
+]
