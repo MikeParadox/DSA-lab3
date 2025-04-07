@@ -51,18 +51,15 @@ int main(int argc, char** argv)
     //     ContainerTemplate<int> Tree2(Tree);
     // }
 
-    ContainerTemplate<int> Tree = {40, 50, 30, 35, 10, 75, 23, 87, 68};
-    ContainerTemplate<int> Tree2(Tree);
-    ContainerTemplate<int> Tree3{Tree.rbegin(), Tree.rend()};
-    // Tree2 = Tree;
-    println("{}", Tree == Tree2);
-    Tree.print_post();
-    Tree2.print_post();
-    auto it = Tree.end();
-    println();
-    println("{}", *++it);
-    println("{}", *++it);
+    ContainerTemplate<std::string> T1{"abc", "cde", "123", "AAAAAAAA"};
 
+    // std::for_each(T1.rbegin(), T1.rend(), [](auto x) { print("{} ", x); });
+    // T1.print_post();
+    // auto it = T1.end();
+    // print("{} ", *--it);
+    // print("{} ", *--it);
+    // print("{} ", *--it);
+    // print("{} ", *--it);
 
     return 0;
 }
