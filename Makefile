@@ -1,20 +1,21 @@
 compile:
-	ninja -C build
+	ninja -C ./build/debug/
 run:
-	./build/main
+	./build/debug/main
 test:
-	./build/main_tests
+	./build/debug/main_tests
 multitest:
-	./build/main_tests --gtest_repeat=100
+	./build/debug/main_tests --gtest_repeat=100
 filtered_tests:
-	./build/main_tests --gtest_filter=swap*
+	./build/debug/main_tests --gtest_filter=swap*
 valgrind:
-	valgrind --leak-check=yes --track-origins=yes -s ./build/main
+	valgrind --leak-check=yes --track-origins=yes -s ./build/debug/main
 build_again:
-	rm -r build/*
-	cmake -G "Ninja" -B build -S .
-to_build_release:
-	cmake -S . -B release/ -D CMAKE_BUILD_TYPE=Release
-	cmake --build release/	
-to_run_release:
-	./release/main
+	rm -rf build/*
+	cmake -G "Ninja" -D CMAKE_BUILD_TYPE=Debug -B ./build/debug -S .
+# to_build_release:
+#	rm -rf build/*
+# 	cmake -G "Ninja" -D CMAKE_BUILD_TYPE=Release -S . -B ./build/release/ 
+# 	cmake --build ./build/release/	
+# to_run_release:
+# 	./build/release/main

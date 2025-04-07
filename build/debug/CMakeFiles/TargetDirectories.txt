@@ -1,0 +1,11 @@
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/CMakeFiles/test.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/CMakeFiles/edit_cache.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/CMakeFiles/rebuild_cache.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/src/CMakeFiles/main.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/src/CMakeFiles/test.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/src/CMakeFiles/edit_cache.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/src/CMakeFiles/rebuild_cache.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests/CMakeFiles/main_tests.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests/CMakeFiles/test.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests/CMakeFiles/edit_cache.dir
+/home/mikhail/programming/cs/dsa/labs/lab3/build/debug/tests/CMakeFiles/rebuild_cache.dir
