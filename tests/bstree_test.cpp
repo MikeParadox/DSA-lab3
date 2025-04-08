@@ -226,9 +226,9 @@ TEST(SetTests, SetSwapAndCompTests)
     ASSERT_TRUE(!v0.empty() && v1.empty());
     std::swap(v0, v1);
     ASSERT_TRUE(v0.empty() && !v1.empty());
-    // ASSERT_TRUE(v1 == v1 && v0 < v1) << "Сравнение множеств некорректно !";
-    // ASSERT_TRUE(v0 != v1 && v1 > v0) << "Сравнение множеств некорректно!";
-    // ASSERT_TRUE(v0 <= v1 && v1 >= v0) << "Сравнение множеств некорректно!";
+    ASSERT_TRUE(v1 == v1 && v0 < v1) << "Сравнение множеств некорректно !";
+    ASSERT_TRUE(v0 != v1 && v1 > v0) << "Сравнение множеств некорректно!";
+    ASSERT_TRUE(v0 <= v1 && v1 >= v0) << "Сравнение множеств некорректно!";
 }
 
 TEST(SetTests, SetComparatorTests)
@@ -249,10 +249,10 @@ TEST(SetTests, SetAlgTests)
     ASSERT_TRUE(v4.count('x') == 0 && v4.count('b') == 1);
     ASSERT_TRUE(*v4.lower_bound('a') == 'a') << "Метод lower_bound";
     ASSERT_TRUE(*v4.upper_bound('a') == 'b') << "Метод upper_bound";
-    // std::pair<Mycont::const_iterator, Mycont::const_iterator> pcc =
-    //     v4.equal_range('a');
-    // ASSERT_TRUE(*pcc.first == 'a' && *pcc.second == 'b')
-    //     << "Ошибка метода equal_range";
+    std::pair<Mycont::const_iterator, Mycont::const_iterator> pcc =
+        v4.equal_range('a');
+    ASSERT_TRUE(*pcc.first == 'a' && *pcc.second == 'b')
+        << "Ошибка метода equal_range";
 }
 
 
