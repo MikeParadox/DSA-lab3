@@ -356,32 +356,32 @@ TEST(MemoryTests, StringTests)
         << "Неправильный порядок строковых элементов";
 }
 
-// TEST(MemoryTests, ElemTests)
-// {
-//     size_t init_count = Elem::count();
-//     {
-//         ContainerTemplate<Elem> T1;
-//         ASSERT_TRUE(Elem::count() - init_count == 0)
-//             << "Создан лишний экземпляр класса Elem";
+TEST(MemoryTests, ElemTests)
+{
+    size_t init_count = Elem::count();
+    {
+        ContainerTemplate<Elem> T1;
+        ASSERT_TRUE(Elem::count() - init_count == 0)
+            << "Создан лишний экземпляр класса Elem";
 
-//         for (const auto& elem : T1)
-//             ASSERT_ANY_THROW() << L"Что-то лежит в пустом сете";
+        for (const auto& elem : T1)
+            ASSERT_ANY_THROW() << L"Что-то лежит в пустом сете";
 
-//         T1.insert(Elem(40));
-//         T1.insert(Elem(75));
-//         T1.insert(Elem(50));
-//         T1.insert(Elem(23));
-//         T1.insert(Elem(87));
-//         ASSERT_TRUE(Elem::count() - init_count == 5)
-//             << "Создан лишний экземпляр класса Elem";
-//         T1.erase(Elem(75));
-//         ASSERT_TRUE(Elem::count() - init_count == 4)
-//             << "Неправильно работает удаление элементов дерева";
-//         T1.erase(Elem(100));
-//         ASSERT_TRUE(Elem::count() - init_count == 4)
-//             << "Неправильно работает удаление несуществующих элементов";
-//     }
-//     ASSERT_TRUE(Elem::count() - init_count == 0) << "Утечка памяти !!";
-// }
+        T1.insert(Elem(40));
+        T1.insert(Elem(75));
+        T1.insert(Elem(50));
+        T1.insert(Elem(23));
+        T1.insert(Elem(87));
+        ASSERT_TRUE(Elem::count() - init_count == 5)
+            << "Создан лишний экземпляр класса Elem";
+        T1.erase(Elem(75));
+        ASSERT_TRUE(Elem::count() - init_count == 4)
+            << "Неправильно работает удаление элементов дерева";
+        T1.erase(Elem(100));
+        ASSERT_TRUE(Elem::count() - init_count == 4)
+            << "Неправильно работает удаление несуществующих элементов";
+    }
+    ASSERT_TRUE(Elem::count() - init_count == 0) << "Утечка памяти !!";
+}
 
 } // namespace TreeTest

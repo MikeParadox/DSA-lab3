@@ -53,6 +53,10 @@ int main(int argc, char** argv)
 
     ContainerTemplate<std::string> T1{"abc", "cde", "123", "AAAAAAAA"};
 
+    const auto txt = "deg";
+    T1.insert(txt);
+    T1.print_post();
+
     // std::for_each(T1.rbegin(), T1.rend(), [](auto x) { print("{} ", x); });
     // T1.print_post();
     // auto it = T1.end();
@@ -60,6 +64,9 @@ int main(int argc, char** argv)
     // print("{} ", *--it);
     // print("{} ", *--it);
     // print("{} ", *--it);
+
+    println();
+    println("{} ", txt);
 
     return 0;
 }

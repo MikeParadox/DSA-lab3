@@ -14,7 +14,7 @@ using std::println;
 
 template<typename T, class Compare = std::less<T>,
          class Allocator = std::allocator<T>>
-    requires std::equality_comparable<T>
+
 class BinarySearchTree
 {
     struct Node;
@@ -178,7 +178,10 @@ public:
     {
         return std::pair<iterator, iterator>{lower_bound(k), upper_bound(k)};
     }
-    iterator find(value_type value) const { return find(_end->right, value); }
+    iterator find(value_type value) const
+    {
+        return find(_end->right, std::move(value));
+    }
     std::uint8_t count(const value_type& value) const
     {
         return find(_end->right, value) != end();
@@ -188,8 +191,9 @@ public:
     iterator find_prev(iterator it) { return --it; }
     iterator find_next(iterator it) { return ++it; }
 
-    iterator insert(const value_type& value);
-    std::pair<iterator, bool> insert(value_type&& value);
+    std::pair<iterator, bool> insert(value_type value);
+    // iterator insert(value_type value);
+    // std::pair<iterator, bool> insert(value_type&& value);
     template<class Iterator> void insert(Iterator first, Iterator last)
     {
         while (first != last) insert(*first++);
@@ -197,7 +201,7 @@ public:
     const_iterator insert(iterator pos, value_type value);
     iterator erase(iterator pos);
     iterator erase(iterator first, iterator last);
-    size_type erase(const value_type& value);
+    size_type erase(value_type value);
     void clear();
     void swap(BinarySearchTree& rhs) noexcept;
 
@@ -291,7 +295,7 @@ template<typename T, class Compare, class Allocator>
 using iterator = typename BinarySearchTree<T, Compare, Allocator>::iterator;
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(Compare comp,
                                                           AllocType alloc)
     : _cmp{comp}, _alloc{alloc}
@@ -302,7 +306,7 @@ BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(Compare comp,
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(
     const BinarySearchTree& rhs)
     : BinarySearchTree()
@@ -311,7 +315,7 @@ BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(
     const std::initializer_list<T>& lst, Compare comp, AllocType alloc)
     : BinarySearchTree(comp, alloc)
@@ -320,7 +324,7 @@ BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 template<class Iterator>
 BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(Iterator first,
                                                           Iterator last,
@@ -332,7 +336,7 @@ BinarySearchTree<T, Compare, Allocator>::BinarySearchTree(Iterator first,
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 BinarySearchTree<T, Compare, Allocator>::~BinarySearchTree()
 {
     clear();
@@ -340,7 +344,7 @@ BinarySearchTree<T, Compare, Allocator>::~BinarySearchTree()
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 BinarySearchTree<T, Compare, Allocator>&
 BinarySearchTree<T, Compare, Allocator>::operator=(const BinarySearchTree& rhs)
 {
@@ -351,7 +355,7 @@ BinarySearchTree<T, Compare, Allocator>::operator=(const BinarySearchTree& rhs)
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 bool BinarySearchTree<T, Compare, Allocator>::operator<(
     const BinarySearchTree& rhs) const
 {
@@ -367,7 +371,7 @@ bool BinarySearchTree<T, Compare, Allocator>::operator<(
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 bool BinarySearchTree<T, Compare, Allocator>::operator>(
     const BinarySearchTree& rhs) const
 {
@@ -375,7 +379,7 @@ bool BinarySearchTree<T, Compare, Allocator>::operator>(
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 bool BinarySearchTree<T, Compare, Allocator>::operator<=(
     const BinarySearchTree& rhs) const
 {
@@ -383,7 +387,7 @@ bool BinarySearchTree<T, Compare, Allocator>::operator<=(
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 bool BinarySearchTree<T, Compare, Allocator>::operator>=(
     const BinarySearchTree& rhs) const
 {
@@ -391,19 +395,19 @@ bool BinarySearchTree<T, Compare, Allocator>::operator>=(
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 BinarySearchTree<T, Compare, Allocator>::iterator
 BinarySearchTree<T, Compare, Allocator>::find(Node* cur, value_type value) const
 {
     if (cur->is_nill) return _end;
-    if (cur->data == value) return cur;
+    if (!_cmp(cur->data, value) && !_cmp(value, cur->data)) return cur;
 
-    if (value < cur->data) return find(cur->left, value);
-    else return find(cur->right, value);
+    if (value < cur->data) return find(cur->left, std::move(value));
+    else return find(cur->right, std::move(value));
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 iterator<T, Compare, Allocator>
 BinarySearchTree<T, Compare, Allocator>::lower_bound(
     const value_type& value) const
@@ -428,7 +432,6 @@ BinarySearchTree<T, Compare, Allocator>::lower_bound(
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
 iterator<T, Compare, Allocator>
 BinarySearchTree<T, Compare, Allocator>::upper_bound(
     const value_type& value) const
@@ -437,64 +440,59 @@ BinarySearchTree<T, Compare, Allocator>::upper_bound(
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
 void BinarySearchTree<T, Compare, Allocator>::clear()
 {
     erase(begin(), end());
 }
 
+// template<typename T, class Compare, class Allocator>
+// BinarySearchTree<T, Compare, Allocator>::iterator
+// BinarySearchTree<T, Compare, Allocator>::insert(value_type value)
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
-BinarySearchTree<T, Compare, Allocator>::iterator
-BinarySearchTree<T, Compare, Allocator>::insert(const value_type& value)
+std::pair<typename BinarySearchTree<T, Compare, Allocator>::iterator, bool>
+BinarySearchTree<T, Compare, Allocator>::insert(value_type value)
 {
-    auto val = value;
+    auto old_size = _size;
+
     if (_end->right->is_nill)
     {
-        _end->left = _end->right = make_node(std::move(val), _end, _end, _end);
+        _end->left = _end->right =
+            make_node(std::move(value), _end, _end, _end);
         _end->parent = _end->right;
         ++_size;
-        return _end->right;
+        return std::pair<iterator, bool>(_end->right, old_size != _size);
     }
-    return insert(_end->right, value);
+    return std::pair<iterator, bool>(insert(_end->right, std::move(value)),
+                                     old_size != _size);
 }
 
-template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
-std::pair<typename BinarySearchTree<T, Compare, Allocator>::iterator, bool>
-BinarySearchTree<T, Compare, Allocator>::insert(value_type&& value)
-{
-    auto res = find(value);
-    bool is_inserted{false};
-    if (res->is_nill)
-    {
-        res = insert(value);
-        is_inserted = true;
-    }
+// template<typename T, class Compare, class Allocator>
+// std::pair<typename BinarySearchTree<T, Compare, Allocator>::iterator, bool>
+// BinarySearchTree<T, Compare, Allocator>::insert(value_type&& value)
+// {
+//     auto old_size = _size;
+//     auto res = insert(value);
 
-    return std::pair<iterator, bool>{res, is_inserted};
-}
+//     return std::pair<iterator, bool>{res, old_size != _size};
+// }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
 BinarySearchTree<T, Compare, Allocator>::iterator
 BinarySearchTree<T, Compare, Allocator>::insert(iterator pos, value_type value)
 {
     if (pos->is_nill) return _end;
-    if (pos->data == value) return pos;
+    if (!_cmp(pos->data, value) && !_cmp(value, pos->data)) return pos;
 
-    auto val = value;
-
-    if (pos->data > value)
+    if (_cmp(value, pos->data))
     {
         if (pos->left->is_nill)
         {
             pos->left = make_node(std::move(value), pos.current(), _end, _end);
             ++_size;
-            if (val < _end->left->data) _end->left = pos->left;
+            if (pos->left->data < _end->left->data) _end->left = pos->left;
             return pos->left;
         }
-        return insert(pos->left, value);
+        return insert(pos->left, std::move(value));
     }
     else
     {
@@ -505,12 +503,11 @@ BinarySearchTree<T, Compare, Allocator>::insert(iterator pos, value_type value)
             if (_end->parent == pos) _end->parent = pos->right;
             return pos->right;
         }
-        return insert(pos->right, value);
+        return insert(pos->right, std::move(value));
     }
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
 BinarySearchTree<T, Compare, Allocator>::iterator
 BinarySearchTree<T, Compare, Allocator>::erase(iterator pos)
 {
@@ -585,7 +582,7 @@ BinarySearchTree<T, Compare, Allocator>::erase(iterator pos)
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 BinarySearchTree<T, Compare, Allocator>::iterator
 BinarySearchTree<T, Compare, Allocator>::erase(iterator first, iterator last)
 {
@@ -595,15 +592,15 @@ BinarySearchTree<T, Compare, Allocator>::erase(iterator first, iterator last)
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 BinarySearchTree<T, Compare, Allocator>::size_type
-BinarySearchTree<T, Compare, Allocator>::erase(const value_type& value)
+BinarySearchTree<T, Compare, Allocator>::erase(value_type value)
 {
-    return erase(find(value)) != _end;
+    return erase(find(std::move(value))) != _end;
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 void BinarySearchTree<T, Compare, Allocator>::swap(
     BinarySearchTree& rhs) noexcept
 {
@@ -612,14 +609,14 @@ void BinarySearchTree<T, Compare, Allocator>::swap(
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 void BinarySearchTree<T, Compare, Allocator>::print_infix() const
 {
     print_infix(_end->right);
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 void BinarySearchTree<T, Compare, Allocator>::print_reverse_infix() const
 {
     std::stack<Node*> st;
@@ -644,7 +641,7 @@ void BinarySearchTree<T, Compare, Allocator>::print_reverse_infix() const
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 void BinarySearchTree<T, Compare, Allocator>::print_layers() const
 {
     if (_end->right == _end) return;
@@ -670,7 +667,7 @@ void BinarySearchTree<T, Compare, Allocator>::print_layers() const
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 bool BinarySearchTree<T, Compare, Allocator>::compare(Node* a, Node* b) const
 {
     if (a->is_nill != b->is_nill) return false;
@@ -682,7 +679,7 @@ bool BinarySearchTree<T, Compare, Allocator>::compare(Node* a, Node* b) const
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 void BinarySearchTree<T, Compare, Allocator>::print_infix(Node* n) const
 {
     if (!n || n == _end) return;
@@ -692,7 +689,7 @@ void BinarySearchTree<T, Compare, Allocator>::print_infix(Node* n) const
 }
 
 template<typename T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 void BinarySearchTree<T, Compare, Allocator>::print_post(Node* n, size_t depth)
 {
     if (!n->is_nill)
@@ -706,7 +703,7 @@ void BinarySearchTree<T, Compare, Allocator>::print_post(Node* n, size_t depth)
 
 template<class T, class Compare = std::less<T>,
          class Allocator = std::allocator<T>>
-    requires std::equality_comparable<T>
+
 void swap(BinarySearchTree<T, Compare, Allocator>& a,
           BinarySearchTree<T, Compare, Allocator>& b)
 {
@@ -714,7 +711,7 @@ void swap(BinarySearchTree<T, Compare, Allocator>& a,
 }
 
 template<class T, class Compare, class Allocator>
-    requires std::equality_comparable<T>
+
 void BinarySearchTree<T, Compare, Allocator>::dispatch(Node* n)
 {
     if (n->is_nill) return;
